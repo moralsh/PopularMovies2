@@ -23,6 +23,8 @@ import android.content.Context;
 
 import org.moralsh.android.popularmovies.BuildConfig;
 import org.moralsh.android.popularmovies.MainActivity;
+import org.moralsh.android.popularmovies.Movie;
+import org.moralsh.android.popularmovies.Movies;
 import org.moralsh.android.popularmovies.R;
 
 import java.io.IOException;
@@ -30,6 +32,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 
@@ -40,12 +44,14 @@ public class NetworkUtils {
 
 
     // Some useful constants
-
+    final public static List<Movie> MovieList = new ArrayList<>();
     final static String THEMOVIEDB_BASE_URL =
             "http://api.themoviedb.org/3";
     final static String  POPULAR_MOVIES = "/movie/popular";
     final static String  TOP_RATED_MOVIES = "/movie/top_rated";
     final static String  MOVIE_DETAIL = "/movie/";
+    final static String  REVIEW_DETAIL = "/videos/";
+    final static String  VIDEO_DETAIL = "/reviews/";
 
     final static String PARAM_QUERY = "api_key";
 
@@ -58,9 +64,10 @@ public class NetworkUtils {
      *
      * @return The URL to use to query TMDB server.
      */
-    public static URL buildPopularUrl() {
+    public static URL buildPopularUrl(int page) {
         Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL + POPULAR_MOVIES).buildUpon()
                 .appendQueryParameter(PARAM_QUERY, TheMovieDBApiKey)
+                .appendQueryParameter("page","" + page)
                 .build();
 
         URL url = null;
@@ -78,7 +85,7 @@ public class NetworkUtils {
      *
      * @return The URL to use to query TMDB server.
      */
-    public static URL buildTopRatedUrl() {
+    public static URL buildTopRatedUrl(int page) {
         Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL + TOP_RATED_MOVIES).buildUpon()
                 .appendQueryParameter(PARAM_QUERY, TheMovieDBApiKey)
                 .build();
@@ -101,6 +108,48 @@ public class NetworkUtils {
      */
     public static URL buildMovieDetailUrl(int movieId) {
         Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL + MOVIE_DETAIL + movieId).buildUpon()
+                .appendQueryParameter(PARAM_QUERY, TheMovieDBApiKey)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    /**
+     * Builds the URL used to query detail on a particular movie. Not used yet
+     *
+     * @param movieId The movie ID on which to return details
+     * @return The URL to use to query TMDB server.
+     */
+    public static URL buildMovieReviewsUrl(int movieId) {
+        Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL + MOVIE_DETAIL + movieId + REVIEW_DETAIL).buildUpon()
+                .appendQueryParameter(PARAM_QUERY, TheMovieDBApiKey)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    /**
+     * Builds the URL used to query detail on a particular movie. Not used yet
+     *
+     * @param movieId The movie ID on which to return details
+     * @return The URL to use to query TMDB server.
+     */
+    public static URL buildMovieVideosUrl(int movieId) {
+        Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL + MOVIE_DETAIL + movieId + VIDEO_DETAIL).buildUpon()
                 .appendQueryParameter(PARAM_QUERY, TheMovieDBApiKey)
                 .build();
 

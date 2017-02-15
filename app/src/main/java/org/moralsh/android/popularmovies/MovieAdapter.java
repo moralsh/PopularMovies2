@@ -1,6 +1,7 @@
 package org.moralsh.android.popularmovies;
 
 import android.content.Context;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import org.moralsh.android.popularmovies.Movies;
+import org.moralsh.android.popularmovies.utilities.NetworkUtils;
 
 /**
  * Class to serve as Recyclerview adapter
@@ -111,6 +113,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             itemView.setOnClickListener(this);
         }
 
+
         /**
          * A method we wrote for convenience. This method will take an integer as input and
          * use that integer to display the appropriate poster.
@@ -119,8 +122,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
          */
         void bind(int listIndex) {
             Context context = MoviePosterView.getContext();
-            if (Movies.getMovieTitle(listIndex) != null) {
-                Picasso.with(context).load(Movies.getMoviePosterURL(listIndex)).into(MoviePosterView);
+            if (NetworkUtils.MovieList.size() > 0) {
+                Log.d(TAG,"Index: " + listIndex + " Título: " + NetworkUtils.MovieList.get(listIndex).getMovieTitle());
+                if (NetworkUtils.MovieList.get(listIndex).getMovieTitle() != null) {
+                    Picasso.with(context).load(NetworkUtils.MovieList.get(listIndex).getMoviePosterURL()).into(MoviePosterView);
+                }
+                Log.d(TAG,NetworkUtils.MovieList.toString());
             }
         }
 

@@ -11,6 +11,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.os.Bundle;
 import android.os.AsyncTask;
 
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -61,28 +62,49 @@ public class MainActivity extends AppCompatActivity
         postersList.setHasFixedSize(true);
         postersList.setAdapter(mAdapter);
         if ( NetworkUtils.isOnline(context)) {
-            makePopularMoviesQuery();
+            makePopularMoviesQuery(1);
         } else {
             postersList.setVisibility(View.INVISIBLE);
             mErrorMessage.setVisibility(View.VISIBLE);
         }
     }
 
+    // This is here to ask for more pages when scrolled to bottom, ToDo later
+    private boolean isLastItemDisplaying(RecyclerView recyclerView) {
+        if (recyclerView.getAdapter().getItemCount() != 0) {
+            int lastVisibleItemPosition = ((GridLayoutManager) recyclerView.getLayoutManager()).findLastCompletelyVisibleItemPosition();
+            if (lastVisibleItemPosition != RecyclerView.NO_POSITION && lastVisibleItemPosition == recyclerView.getAdapter().getItemCount() - 1)
+                return true;
+        }
+        return false;
+    }
+
+
     /**
      * This methods retrieve the data for popular and top rated Movies, using AsyncTask via the class declarated below
      */
-    private void makePopularMoviesQuery() {
-        URL popularMoviesQuery = NetworkUtils.buildPopularUrl();
-        new TheMovieDBQueryTask().execute(popularMoviesQuery);
+    private void makePopularMoviesQuery(int page) {
+        URL popularMoviesQuery = NetworkUtils.buildPopularUrl(page);
+        MyTaskParams params = new MyTaskParams(page, popularMoviesQuery);
+        new TheMovieDBQueryTask().execute(params);
     }
 
-    private void makeTopRatedMoviesQuery() {
-        URL topRatedMoviesQuery = NetworkUtils.buildTopRatedUrl();
-        new TheMovieDBQueryTask().execute(topRatedMoviesQuery);
+    private void makeTopRatedMoviesQuery(int page) {
+        URL topRatedMoviesQuery = NetworkUtils.buildTopRatedUrl(page);
+        MyTaskParams params = new MyTaskParams(page, topRatedMoviesQuery);
+        new TheMovieDBQueryTask().execute(params);
     }
 
+    private static class MyTaskParams {
+        int pageIndex;
+        URL url;
 
-    public class TheMovieDBQueryTask extends AsyncTask<URL, Void, String> {
+        MyTaskParams(int pageIndex, URL url) {
+            this.pageIndex = pageIndex;
+            this.url = url;
+        }
+    }
+    public class TheMovieDBQueryTask extends AsyncTask<MyTaskParams, Void, String> {
 
         @Override
         protected void onPreExecute() {
@@ -93,8 +115,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(URL... params) {
-            URL apiURL = params[0];
+        protected String doInBackground(MyTaskParams... params) {
+            URL apiURL = params[0].url;
             String tmdbResults = null;
             try {
                 tmdbResults = NetworkUtils.getResponseFromHttpUrl(apiURL);
@@ -109,45 +131,20 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(String tmdbResults) {
             postersList.setVisibility(View.VISIBLE);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            String[] posterPathArray = new String[Movies.NUMBER_OF_POSTERS];
-            String[] backgroundPathArray = new String[Movies.NUMBER_OF_POSTERS];
-            String[] releaseDateArray = new String[Movies.NUMBER_OF_POSTERS];
-            String[] overviewArray = new String[Movies.NUMBER_OF_POSTERS];
-            Double[] ratingsArray = new Double[Movies.NUMBER_OF_POSTERS];
-            int[] movieIdArray = new int[Movies.NUMBER_OF_POSTERS];
-            String[] movieTitleArray = new String[Movies.NUMBER_OF_POSTERS];
+
 
             if (tmdbResults != null && !tmdbResults.equals("")) {
                 try {
                     JSONObject popularMoviesJSON = new JSONObject(tmdbResults);
                     JSONArray resultsArray = popularMoviesJSON.getJSONArray("results");
+                    Movie movieToAdd;
                     for (int i = 0; i< resultsArray.length(); i++) {
                         JSONObject jsonobject = resultsArray.getJSONObject(i);
-                        String title = jsonobject.getString("title");
-                        String overview = jsonobject.getString("overview");
-                        String releasDate = jsonobject.getString("release_date");
-                        Double rating = jsonobject.getDouble("vote_average");
-
-                        int id = jsonobject.getInt("id");
-                        String posterPath = jsonobject.getString("poster_path");
-                        String backdropPath = jsonobject.getString("backdrop_path");
-                        movieIdArray[i] = id;
-                        posterPathArray[i] = NetworkUtils.buildPosterImageUrl(posterPath).toString();
-                        backgroundPathArray[i] = NetworkUtils.buildPosterImageUrl(backdropPath,"original").toString();
-                        movieTitleArray[i] = title;
-                        overviewArray[i] = overview;
-                        ratingsArray[i] = rating;
-                        releaseDateArray[i] = releasDate;
+                        movieToAdd = new Movie(jsonobject);
+                        NetworkUtils.MovieList.add(movieToAdd);
                     }
-                    Movies.setMoviePosterURL(posterPathArray);
-                    Movies.setMovieTitle(movieTitleArray);
-                    Movies.setMovieBackground(backgroundPathArray);
-                    Movies.setMovieOverview(overviewArray);
-                    Movies.setMovieRating(ratingsArray);
-                    Movies.setMovieReleaseDate(releaseDateArray);
 
                     mAdapter.notifyDataSetChanged();
-
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -166,12 +163,12 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
         if (itemThatWasClickedId == R.id.action_popular) {
-            makePopularMoviesQuery();
+            makePopularMoviesQuery(1);
             mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
             postersList.setAdapter(mAdapter);
             return true;
         } else if (itemThatWasClickedId == R.id.action_top_rated) {
-            makeTopRatedMoviesQuery();
+            makeTopRatedMoviesQuery(1);
             mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
             postersList.setAdapter(mAdapter);
             return true;

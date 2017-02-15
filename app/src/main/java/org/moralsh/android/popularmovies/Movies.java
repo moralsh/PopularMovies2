@@ -86,7 +86,12 @@ public class Movies {
         return movieRating[index];
     }
 
-    public void setMovieId(int[] id) {
+    public static void setMovieId(int[] id) {
         movieId = id;
     }
+
+    public static int getMovieId(int index) {
+        return movieId[index];
+    }
+
 }
