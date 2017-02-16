@@ -20,6 +20,10 @@
         </activity>
         <activity android:name="org.moralsh.android.popularmovies.MovieDetail">
         </activity>
+        <provider
+            android:name="org.moralsh.android.popularmovies.data.FavoritesContentProvider"
+            android:authorities="org.moralsh.android.popularmovies"
+            android:exported="false"/>
     </application>
 
 </manifest>
