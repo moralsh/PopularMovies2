@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">PopularMovies</string>
     <string name="error_message">There is no network available</string>
+
+    <string name="popular_movies">Popular Movies</string>
+    <string name="top_rated_movies">Top Rated Movies</string>
+    <string name="favorite_movies">Favorite Movies</string>
+
+    <string name="show_reviews">Show Movie Reviews</string>
+    <string name="hide_reviews">Hide Movie Reviews</string>
+    <string name="show_videos">Show Movie Videos</string>
+    <string name="hide_videos">Hide Movie Videos</string>
 </resources>

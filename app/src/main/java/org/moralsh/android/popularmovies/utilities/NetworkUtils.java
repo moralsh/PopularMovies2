@@ -50,8 +50,8 @@ public class NetworkUtils {
     final static String  POPULAR_MOVIES = "/movie/popular";
     final static String  TOP_RATED_MOVIES = "/movie/top_rated";
     final static String  MOVIE_DETAIL = "/movie/";
-    final static String  REVIEW_DETAIL = "/videos/";
-    final static String  VIDEO_DETAIL = "/reviews/";
+    final static String  REVIEW_DETAIL = "/reviews";
+    final static String  VIDEO_DETAIL = "/videos";
 
     final static String PARAM_QUERY = "api_key";
 

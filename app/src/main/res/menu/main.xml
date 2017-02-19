@@ -19,10 +19,14 @@
     <item
         android:id="@+id/action_popular"
         android:orderInCategory="1"
-        android:title="Popular Movies"/>
+        android:title="@string/popular_movies"/>
     <item
         android:id="@+id/action_top_rated"
-        android:orderInCategory="1"
-        android:title="Top Rated Movies"/>
+        android:orderInCategory="2"
+        android:title="@string/top_rated_movies"/>
+    <item
+        android:id="@+id/action_favorites"
+        android:orderInCategory="3"
+        android:title="@string/favorite_movies"/>
 
 </menu>

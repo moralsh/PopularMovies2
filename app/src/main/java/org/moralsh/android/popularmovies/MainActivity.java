@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity
 
             if (tmdbResults != null && !tmdbResults.equals("")) {
                 try {
+                    NetworkUtils.MovieList.clear();
                     JSONObject popularMoviesJSON = new JSONObject(tmdbResults);
                     JSONArray resultsArray = popularMoviesJSON.getJSONArray("results");
                     Movie movieToAdd;
@@ -171,6 +172,8 @@ public class MainActivity extends AppCompatActivity
             makeTopRatedMoviesQuery(1);
             mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
             postersList.setAdapter(mAdapter);
+            return true;
+        } else if (itemThatWasClickedId == R.id.action_favorites) {
             return true;
         }
         return super.onOptionsItemSelected(item);

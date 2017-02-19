@@ -90,6 +90,10 @@ public class Movie {
         private String content;
         private String url;
 
+        public void Reviews(JSONObject json) {
+            jsonParse(json);
+        }
+
         public String getId() {
             return id;
         }
@@ -135,6 +139,7 @@ public class Movie {
     }
 
     public class Videos {
+        private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=";
         private String id;
         private String iso_639_1;
         private String iso_3166_1;
@@ -212,7 +217,7 @@ public class Movie {
             try {
                 setId(json.getString("id"));
                 setIso_639_1(json.getString("iso_639_1"));
-                setIso_3166_1(json.getString("iso_4166"));
+                setIso_3166_1(json.getString("iso_3166_1"));
                 setKey(json.getString("key"));
                 setName(json.getString("name"));
                 setSite(json.getString("site"));

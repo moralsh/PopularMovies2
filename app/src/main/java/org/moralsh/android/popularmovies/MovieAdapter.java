@@ -123,11 +123,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         void bind(int listIndex) {
             Context context = MoviePosterView.getContext();
             if (NetworkUtils.MovieList.size() > 0) {
-                Log.d(TAG,"Index: " + listIndex + " Título: " + NetworkUtils.MovieList.get(listIndex).getMovieTitle());
                 if (NetworkUtils.MovieList.get(listIndex).getMovieTitle() != null) {
                     Picasso.with(context).load(NetworkUtils.MovieList.get(listIndex).getMoviePosterURL()).into(MoviePosterView);
                 }
-                Log.d(TAG,NetworkUtils.MovieList.toString());
             }
         }
 

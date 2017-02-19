@@ -12,63 +12,113 @@
         android:layout_height="match_parent"
         tools:context=".MovieDetail">
 
+        <ImageView
+                android:id="@+id/iv_background_Image"
+                android:layout_width="match_parent"
+                android:layout_height="270dp"
+                />
 
-
-    <ImageView
-            android:id="@+id/iv_background_Image"
-            android:layout_width="match_parent"
-            android:layout_height="270dp"
+        <ImageView
+            android:id="@+id/iv_poster_Image_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/iv_background_Image"
             />
 
-    <ImageView
-        android:id="@+id/iv_poster_Image_detail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/iv_background_Image"
-        />
-
-    <TextView
-        android:id="@+id/tv_title_display"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/iv_background_Image"
-        android:layout_toEndOf="@id/iv_poster_Image_detail"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:textSize="25sp" />
-
-
-    <TextView
-        android:id="@+id/tv_data_display"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/iv_poster_Image_detail"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:textSize="20sp"
-        />
-
-    <TextView
-        android:id="@+id/tv_review_json_display"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_data_display"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:textSize="20sp"
-        />
-
-    <TextView
-        android:id="@+id/tv_video_json_display"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_review_json_display"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:textSize="20sp"
-        />
+        <TextView
+            android:id="@+id/tv_title_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/iv_background_Image"
+            android:layout_toEndOf="@id/iv_poster_Image_detail"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="25sp" />
+        <ImageView
+            android:id="@+id/ic_fav_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_title_display"
+            android:layout_toEndOf="@id/iv_poster_Image_detail"
+            android:src="@mipmap/ic_star_empty"
+            android:onClick="makeFavorite"/>
 
 
+        <TextView
+            android:id="@+id/tv_data_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_poster_Image_detail"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="20sp"
+            />
+
+        <ImageView
+            android:id="@+id/ic_show_reviews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_data_display"
+            android:src="@mipmap/ic_up"
+            android:onClick="showHideReviews"/>
+
+        <TextView
+            android:id="@+id/tv_review_title_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_data_display"
+            android:layout_toEndOf="@id/ic_show_reviews"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="20sp"
+            android:text="@string/show_reviews"
+            />
+
+        <TextView
+            android:id="@+id/tv_review_json_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_review_title_display"
+            android:paddingTop="30dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="20sp"
+            android:visibility="gone"
+            />
+
+        <ImageView
+            android:id="@+id/ic_show_videos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_review_json_display"
+            android:src="@mipmap/ic_up"
+            android:onClick="showHideVideos"/>
+
+        <TextView
+            android:id="@+id/tv_video_title_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_review_json_display"
+            android:layout_toEndOf="@id/ic_show_videos"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="20sp"
+            android:text="@string/show_videos"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_video_json_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_video_title_display"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="30dp"
+            android:textSize="20sp"
+            android:visibility="gone"
+            android:scrollbars="none"
+            android:text="videos here"
+            />
 
     </RelativeLayout>
 
