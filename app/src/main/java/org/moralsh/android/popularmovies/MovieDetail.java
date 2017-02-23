@@ -1,7 +1,9 @@
 package org.moralsh.android.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,13 +13,16 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.moralsh.android.popularmovies.data.FavoritesContract;
 import org.moralsh.android.popularmovies.utilities.NetworkUtils;
 
 
@@ -25,6 +30,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.moralsh.android.popularmovies.data.FavoritesContract.FavoritesEntry.CONTENT_URI;
 
 /**
  * Class created to serve a Child Activity to display movie details, once you click in the movie poster on the main Activity
@@ -45,6 +52,8 @@ public class MovieDetail extends AppCompatActivity
     final public static List<Movie.Reviews> reviewList = new ArrayList<>();
     final public static List<Movie.Videos> videoList = new ArrayList<>();
 
+    int currentIndex;
+
     private MoviesVideoAdapter mVideoAdapter;
     // Widgets declaration
     private boolean isFavorite;
@@ -58,14 +67,17 @@ public class MovieDetail extends AppCompatActivity
     private RecyclerView mDisplayVideos;
     private ImageView mShowReviews, mShowVideos;
     private ImageView mFavorite;
+    private ScrollView mScrollView;
 
 
     public void makeFavorite(View view) {
+        isFavorite = checkFavorite(NetworkUtils.MovieList.get(currentIndex).getMovieId());
         if (!isFavorite) {
             mFavorite.setImageResource(R.mipmap.ic_star);
-            isFavorite = true;
+            addFavorite();
         } else {  //unfavorite it
             mFavorite.setImageResource(R.mipmap.ic_star_empty);
+            removeFavorite();
             isFavorite = false;
         }
     }
@@ -109,6 +121,58 @@ public class MovieDetail extends AppCompatActivity
         new VideosTask().execute(videosQuery);
     }
 
+    private void addFavorite() {
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID, NetworkUtils.MovieList.get(currentIndex).getMovieId());
+        contentValues.put(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW, NetworkUtils.MovieList.get(currentIndex).getMovieOverview());
+        contentValues.put(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE, NetworkUtils.MovieList.get(currentIndex).getMovieReleaseDate());
+        contentValues.put(FavoritesContract.FavoritesEntry.COLUMN_RATING, NetworkUtils.MovieList.get(currentIndex).getMovieRating());
+        contentValues.put(FavoritesContract.FavoritesEntry.COLUMN_TITLE, NetworkUtils.MovieList.get(currentIndex).getMovieTitle());
+        contentValues.put(FavoritesContract.FavoritesEntry.COLUMN_BACKGROUND, NetworkUtils.MovieList.get(currentIndex).getMovieBackground());
+        contentValues.put(FavoritesContract.FavoritesEntry.COLUMN_POSTER, NetworkUtils.MovieList.get(currentIndex).getMoviePosterURL());
+        // Insert the content values via a ContentResolver
+        Uri uri = getContentResolver().insert(CONTENT_URI, contentValues);
+
+        // COMPLETED (8) Display the URI that's returned with a Toast
+        // [Hint] Don't forget to call finish() to return to MainActivity after this insert is complete
+        if(uri != null) {
+            Toast.makeText(getBaseContext(), NetworkUtils.MovieList.get(currentIndex).getMovieTitle() +" added to Favorites!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void removeFavorite() {
+        int favoritesDeleted;
+        String stringId = NetworkUtils.MovieList.get(currentIndex).getMovieId() + "";
+        Uri uri = CONTENT_URI;
+        uri = uri.buildUpon().appendPath(stringId).build();
+
+        favoritesDeleted = getContentResolver().delete(uri, null, null);
+
+        if (favoritesDeleted < 1) {
+            Toast.makeText(getBaseContext(), NetworkUtils.MovieList.get(currentIndex).getMovieTitle() + " NOT removed from Favorites " + favoritesDeleted , Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getBaseContext(), NetworkUtils.MovieList.get(currentIndex).getMovieTitle() + " removed from Favorites!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean checkFavorite(int movieId) {
+        Cursor mData;
+        String stringId = movieId +""; //NetworkUtils.MovieList.get(currentIndex).getMovieId() +"";
+        Uri uri = CONTENT_URI;
+        uri = uri.buildUpon().appendPath(stringId).build();
+
+        mData = getContentResolver().query(uri,null,null,null,null);
+
+        if ( mData.getCount() > 0) {
+            isFavorite = true;
+            return true;
+        } else {
+            isFavorite = false;
+            return false;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,6 +191,7 @@ public class MovieDetail extends AppCompatActivity
         mShowReviews = (ImageView) findViewById(R.id.ic_show_reviews);
         mShowVideos = (ImageView) findViewById(R.id.ic_show_videos);
         mFavorite = (ImageView) findViewById(R.id.ic_fav_icon);
+        mScrollView = (ScrollView) findViewById(R.id.sv_movie_detail);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mDisplayVideos.setLayoutManager(layoutManager);
@@ -149,12 +214,12 @@ public class MovieDetail extends AppCompatActivity
             }
             if (showingVideos) {
                 mDisplayVideos.setVisibility(View.VISIBLE);
-                mDisplayVideos.scrollToPosition(videoList.size());
+                mScrollView.scrollTo(0,0);
                 mShowVideos.setImageResource(R.mipmap.ic_down);
                 mDisplayVideoTitle.setText(getString(R.string.hide_videos));
             }
         } else {
-            isFavorite = false;
+            isFavorite = checkFavorite(NetworkUtils.MovieList.get(currentIndex).getMovieId());;
             showingVideos = false;
             showingReviews = false;
         }
@@ -169,6 +234,7 @@ public class MovieDetail extends AppCompatActivity
 
             // Get the index
             index = Integer.parseInt(intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT));
+            currentIndex = index;
 
             // Get the movie ID
             int movieID = NetworkUtils.MovieList.get(index).getMovieId();

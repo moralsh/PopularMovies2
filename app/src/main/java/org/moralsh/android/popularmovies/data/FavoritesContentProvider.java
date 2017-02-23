@@ -88,6 +88,7 @@ public class FavoritesContentProvider extends ContentProvider {
                         null,
                         null,
                         sortOrder);
+                break;
             // Default exception
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
