@@ -4,6 +4,8 @@ package org.moralsh.android.popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.GridLayoutManager;
@@ -25,8 +27,11 @@ import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
+import org.moralsh.android.popularmovies.data.FavoritesContract;
 import org.moralsh.android.popularmovies.utilities.NetworkUtils;
 import org.moralsh.android.popularmovies.Movies;
+
+import static org.moralsh.android.popularmovies.data.FavoritesContract.FavoritesEntry.CONTENT_URI;
 
 public class MainActivity extends AppCompatActivity
                 implements MovieAdapter.MovieClickListener {
@@ -59,7 +64,7 @@ public class MainActivity extends AppCompatActivity
 
 
         mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
-        postersList.setHasFixedSize(true);
+//        postersList.setHasFixedSize(true);
         postersList.setAdapter(mAdapter);
         if ( NetworkUtils.isOnline(context)) {
             makePopularMoviesQuery(1);
@@ -93,6 +98,42 @@ public class MainActivity extends AppCompatActivity
         URL topRatedMoviesQuery = NetworkUtils.buildTopRatedUrl(page);
         MyTaskParams params = new MyTaskParams(page, topRatedMoviesQuery);
         new TheMovieDBQueryTask().execute(params);
+    }
+
+    private void getFavoriteMovies() {
+        Cursor mData;
+        Uri uri = CONTENT_URI;
+
+        NetworkUtils.MovieList.clear();
+        mData = getContentResolver().query(uri, null, null, null, null);
+
+        if (mData.moveToFirst()) {
+            do {
+                Movie movieToAdd = new Movie();
+
+                int movieIdIndex = mData.getColumnIndex(FavoritesContract.FavoritesEntry.COLUMN_MOVIE_ID);
+                int overviewIndex = mData.getColumnIndex(FavoritesContract.FavoritesEntry.COLUMN_OVERVIEW);
+                int releaseDateIndex = mData.getColumnIndex(FavoritesContract.FavoritesEntry.COLUMN_RELEASE_DATE);
+                int ratingIndex = mData.getColumnIndex(FavoritesContract.FavoritesEntry.COLUMN_RATING);
+                int titleIndex = mData.getColumnIndex(FavoritesContract.FavoritesEntry.COLUMN_TITLE);
+                int posterIndex = mData.getColumnIndex(FavoritesContract.FavoritesEntry.COLUMN_POSTER);
+                int backgroundIndex = mData.getColumnIndex(FavoritesContract.FavoritesEntry.COLUMN_BACKGROUND);
+
+                movieToAdd.setMovieId(mData.getInt(movieIdIndex));
+                movieToAdd.setMovieOverview(mData.getString(overviewIndex));
+                movieToAdd.setMovieTitle(mData.getString(titleIndex));
+                movieToAdd.setMovieReleaseDate(mData.getString(releaseDateIndex));
+                movieToAdd.setMovieRating(mData.getDouble(ratingIndex));
+                movieToAdd.setMoviePosterURL(mData.getString(posterIndex));
+                movieToAdd.setMovieBackground(mData.getString(backgroundIndex));
+
+                NetworkUtils.MovieList.add(movieToAdd);
+
+            } while (mData.moveToNext());
+
+            mAdapter.setNumberItems(NetworkUtils.MovieList.size());
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private static class MyTaskParams {
@@ -174,6 +215,9 @@ public class MainActivity extends AppCompatActivity
             postersList.setAdapter(mAdapter);
             return true;
         } else if (itemThatWasClickedId == R.id.action_favorites) {
+            mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
+            postersList.setAdapter(mAdapter);
+            getFavoriteMovies();
             return true;
         }
         return super.onOptionsItemSelected(item);

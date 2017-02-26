@@ -78,6 +78,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         holder.bind(position);
     }
 
+    public void setNumberItems(int number) {
+        mNumberItems = number;
+    }
     /**
      * This method simply returns the number of items to display. It is used behind the scenes
      * to help layout our Views and for animations.

@@ -75,6 +75,7 @@ public class MovieDetail extends AppCompatActivity
         if (!isFavorite) {
             mFavorite.setImageResource(R.mipmap.ic_star);
             addFavorite();
+            isFavorite = true;
         } else {  //unfavorite it
             mFavorite.setImageResource(R.mipmap.ic_star_empty);
             removeFavorite();
@@ -134,8 +135,6 @@ public class MovieDetail extends AppCompatActivity
         // Insert the content values via a ContentResolver
         Uri uri = getContentResolver().insert(CONTENT_URI, contentValues);
 
-        // COMPLETED (8) Display the URI that's returned with a Toast
-        // [Hint] Don't forget to call finish() to return to MainActivity after this insert is complete
         if(uri != null) {
             Toast.makeText(getBaseContext(), NetworkUtils.MovieList.get(currentIndex).getMovieTitle() +" added to Favorites!", Toast.LENGTH_LONG).show();
         }
@@ -161,16 +160,15 @@ public class MovieDetail extends AppCompatActivity
         String stringId = movieId +""; //NetworkUtils.MovieList.get(currentIndex).getMovieId() +"";
         Uri uri = CONTENT_URI;
         uri = uri.buildUpon().appendPath(stringId).build();
+        boolean checkFavorite = false;
 
         mData = getContentResolver().query(uri,null,null,null,null);
 
         if ( mData.getCount() > 0) {
             isFavorite = true;
-            return true;
-        } else {
-            isFavorite = false;
-            return false;
+            checkFavorite = true;
         }
+        return checkFavorite;
     }
 
     @Override
@@ -198,14 +196,27 @@ public class MovieDetail extends AppCompatActivity
         mVideoAdapter = new MoviesVideoAdapter(this,20);
         mDisplayVideos.setAdapter(mVideoAdapter);
 
+        // Get the intent
+        Intent intentThatStartedThisActivity = getIntent();
+
+        if (intentThatStartedThisActivity.hasExtra(Intent.EXTRA_TEXT)) { // Do we have data?
+
+            // Get the index
+            index = Integer.parseInt(intentThatStartedThisActivity.getStringExtra(Intent.EXTRA_TEXT));
+            currentIndex = index;
+        }
+
         if (savedInstanceState != null) {
             isFavorite = savedInstanceState.getBoolean(IS_FAVORITE);
+            isFavorite = checkFavorite(NetworkUtils.MovieList.get(currentIndex).getMovieId());
             showingReviews = savedInstanceState.getBoolean(SHOWING_REVIEWS);
             showingVideos = savedInstanceState.getBoolean(SHOWING_VIDEOS);
 
             // restore the UI accordingly
             if (isFavorite) {
                 mFavorite.setImageResource(R.mipmap.ic_star);
+            } else {
+                mFavorite.setImageResource(R.mipmap.ic_star_empty);
             }
             if (showingReviews) {
                 mDisplayReview.setVisibility(View.VISIBLE);
@@ -219,7 +230,13 @@ public class MovieDetail extends AppCompatActivity
                 mDisplayVideoTitle.setText(getString(R.string.hide_videos));
             }
         } else {
-            isFavorite = checkFavorite(NetworkUtils.MovieList.get(currentIndex).getMovieId());;
+            isFavorite = checkFavorite(NetworkUtils.MovieList.get(currentIndex).getMovieId());
+            // restore the UI accordingly
+            if (isFavorite) {
+                mFavorite.setImageResource(R.mipmap.ic_star);
+            } else {
+                mFavorite.setImageResource(R.mipmap.ic_star_empty);
+            }
             showingVideos = false;
             showingReviews = false;
         }
@@ -227,8 +244,7 @@ public class MovieDetail extends AppCompatActivity
         Context context = mDisplayBackground.getContext();
         Context context_poster = mDisplayPosterDetail.getContext();
 
-        // Get the intent
-        Intent intentThatStartedThisActivity = getIntent();
+
 
         if (intentThatStartedThisActivity.hasExtra(Intent.EXTRA_TEXT)) { // Do we have data?
 

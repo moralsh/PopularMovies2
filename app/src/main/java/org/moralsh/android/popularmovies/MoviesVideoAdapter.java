@@ -83,54 +83,6 @@ public class MoviesVideoAdapter extends RecyclerView.Adapter<MoviesVideoAdapter.
             mOnClickListener.onListItemClick(clickedPosition);
         }
     }
-    /*    private Context mContext;
-    private List<Movie.Videos> mVideos = new ArrayList<>();
 
-    public MoviesVideoAdapter(Context context, List<Movie.Videos> videos) {
-        mContext = context;
-        mVideos = videos;
-        Log.d("MovieVideoAdapter",videos.get(1).getName());
-    }
-
-
-    @Override
-    public int getCount() {
-        return mVideos.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return mVideos.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        View rowView = convertView;
-
-        if (convertView == null) {
-            // Create a new view into the list.
-            LayoutInflater inflater = (LayoutInflater) mContext
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            rowView = inflater.inflate(R.layout.video_view, parent, false);
-        }
-
-        // Set data into the view.
-        ImageView ivItem = (ImageView) rowView.findViewById(R.id.ic_video_list_view);
-        TextView tvTitle = (TextView) rowView.findViewById(R.id.tv_video_list_view);
-
-        Movie.Videos video = mVideos.get(position);
-        tvTitle.setText(video.getName());
-        Log.d("MovieVideoAdapter","position: " + position + " Name: " + video.getName());
-        Log.d("MovieVideoAdapter","size: " + mVideos.size());
-        // ivItem.setImageResource(item.getImage());
-
-        return rowView;
-    } */
 
 }

@@ -148,7 +148,7 @@ public class FavoritesContentProvider extends ContentProvider {
 
         int match = sUriMatcher.match(uri);
         // Keep track of the number of deleted tasks
-        int favoritesDeleted; // starts as 0
+        int favoritesDeleted = 0; // starts as 0
 
         // COMPLETED (2) Write the code to delete a single row of data
         // [Hint] Use selections to delete an item by its row ID
@@ -158,7 +158,7 @@ public class FavoritesContentProvider extends ContentProvider {
                 // Get the task ID from the URI path
                 String id = uri.getPathSegments().get(1);
                 // Use selections/selectionArgs to filter for this ID
-                favoritesDeleted = db.delete(TABLE_NAME, "_id=?", new String[]{id});
+                favoritesDeleted = db.delete(TABLE_NAME, FavoritesEntry.COLUMN_MOVIE_ID + " = ?", new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
