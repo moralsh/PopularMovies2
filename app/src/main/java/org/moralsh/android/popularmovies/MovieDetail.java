@@ -8,8 +8,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -30,6 +32,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static org.moralsh.android.popularmovies.data.FavoritesContract.FavoritesEntry.CONTENT_URI;
 
@@ -56,19 +61,22 @@ public class MovieDetail extends AppCompatActivity
 
     private MoviesVideoAdapter mVideoAdapter;
     // Widgets declaration
+    @BindView(R.id.iv_background_Image) ImageView mDisplayBackground;
+    @BindView(R.id.iv_poster_Image_detail) ImageView mDisplayPosterDetail;
+    @BindView(R.id.ic_show_reviews) ImageView mShowReviews;
+    @BindView(R.id.ic_show_videos) ImageView mShowVideos;
+    @BindView(R.id.ic_fav_icon) ImageView mFavorite;
+    @BindView(R.id.tv_title_display) TextView mDisplayTitle;
+    @BindView(R.id.tv_data_display) TextView mDisplayData;
+    @BindView(R.id.tv_review_json_display) TextView mDisplayReview;
+    @BindView(R.id.tv_review_title_display) TextView mDisplayReviewTitle;
+    @BindView(R.id.tv_video_title_display) TextView mDisplayVideoTitle;
+    @BindView(R.id.rv_video_json_display) RecyclerView mDisplayVideos;
+    @BindView(R.id.sv_movie_detail) ScrollView mScrollView;
+
     private boolean isFavorite;
     private boolean showingReviews;
     private boolean showingVideos;
-    private ImageView mDisplayBackground;
-    private ImageView mDisplayPosterDetail;
-    private TextView mDisplayTitle;
-    private TextView mDisplayData;
-    private TextView mDisplayReview, mDisplayReviewTitle, mDisplayVideoTitle;
-    private RecyclerView mDisplayVideos;
-    private ImageView mShowReviews, mShowVideos;
-    private ImageView mFavorite;
-    private ScrollView mScrollView;
-
 
     public void makeFavorite(View view) {
         isFavorite = checkFavorite(NetworkUtils.MovieList.get(currentIndex).getMovieId());
@@ -171,27 +179,23 @@ public class MovieDetail extends AppCompatActivity
         return checkFavorite;
     }
 
+    public static int calculateNoOfColumns(Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int noOfColumns = (int) (dpWidth / 180);
+        return noOfColumns;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_detail);
+        ButterKnife.bind(this);
 
         int index;
+        int columns = calculateNoOfColumns(this);
 
-        mDisplayBackground = (ImageView) findViewById(R.id.iv_background_Image);
-        mDisplayPosterDetail = (ImageView) findViewById(R.id.iv_poster_Image_detail);
-        mDisplayTitle = (TextView) findViewById(R.id.tv_title_display);
-        mDisplayData = (TextView) findViewById(R.id.tv_data_display);
-        mDisplayReview = (TextView) findViewById(R.id.tv_review_json_display);
-        mDisplayVideos = (RecyclerView) findViewById(R.id.rv_video_json_display);
-        mDisplayReviewTitle = (TextView) findViewById(R.id.tv_review_title_display);
-        mDisplayVideoTitle = (TextView) findViewById(R.id.tv_video_title_display);
-        mShowReviews = (ImageView) findViewById(R.id.ic_show_reviews);
-        mShowVideos = (ImageView) findViewById(R.id.ic_show_videos);
-        mFavorite = (ImageView) findViewById(R.id.ic_fav_icon);
-        mScrollView = (ScrollView) findViewById(R.id.sv_movie_detail);
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,columns);
         mDisplayVideos.setLayoutManager(layoutManager);
         mVideoAdapter = new MoviesVideoAdapter(this,20);
         mDisplayVideos.setAdapter(mVideoAdapter);
@@ -373,7 +377,6 @@ public class MovieDetail extends AppCompatActivity
                         videosToAdd = movieParent.new Videos();
                         videosToAdd.jsonParse(jsonobject);
                         videoList.add(videosToAdd);
-                        Log.d("Videos", jsonobject.toString());
                     }
                     mVideoAdapter.setNumberItems(videoList.size());
                     mVideoAdapter.notifyDataSetChanged();

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,6 +14,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.os.Bundle;
 import android.os.AsyncTask;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -31,47 +33,75 @@ import org.moralsh.android.popularmovies.data.FavoritesContract;
 import org.moralsh.android.popularmovies.utilities.NetworkUtils;
 import org.moralsh.android.popularmovies.Movies;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static org.moralsh.android.popularmovies.data.FavoritesContract.FavoritesEntry.CONTENT_URI;
 
 public class MainActivity extends AppCompatActivity
                 implements MovieAdapter.MovieClickListener {
+    private static final String QUERY_TYPE = "query_type";
 
 
     private MovieAdapter mAdapter;
-    private TextView mErrorMessage;
-    private RecyclerView postersList;
-    private ProgressBar mLoadingIndicator;
+
+    @BindView(R.id.rv_posters) RecyclerView postersList;
+    @BindView(R.id.tv_error_message) TextView mErrorMessage;
+    @BindView(R.id.pb_loading_data) ProgressBar mLoadingIndicator;
+
+    private String movieQuery;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
+        int columns = calculateNoOfColumns(this);
         GridLayoutManager layoutManager;
         Context context = MainActivity.this;
-        postersList = (RecyclerView) findViewById(R.id.rv_posters);
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_data);
-        mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
 
-        // A grid with 2 posters per row or 3 in landscape mode
-        if(this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-             layoutManager = new GridLayoutManager(this,2);
-        } else {
-             layoutManager = new GridLayoutManager(this,3);
-        }
+        postersList.setVisibility(View.INVISIBLE);
+
+        // A grid dynamically adjusted depending on the available width
+        layoutManager = new GridLayoutManager(this,columns);
         postersList.setLayoutManager(layoutManager);
+
+        if (savedInstanceState != null) {
+            movieQuery = savedInstanceState.getString(QUERY_TYPE);
+        } else {
+            movieQuery = "popular"; // we just initialize with one of them
+        }
 
 
         mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
-//        postersList.setHasFixedSize(true);
         postersList.setAdapter(mAdapter);
+
         if ( NetworkUtils.isOnline(context)) {
-            makePopularMoviesQuery(1);
+            Log.d("MovieQuery","MovieQuery: " + movieQuery);
+            switch (movieQuery) {
+                case "popular":
+                    makePopularMoviesQuery(1);
+                    break;
+                case "toprated":
+                    makeTopRatedMoviesQuery(1);
+                    break;
+                case "favorites":
+                    getFavoriteMovies();
+                    break;
+            }
         } else {
             postersList.setVisibility(View.INVISIBLE);
             mErrorMessage.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d("SaveInstanceState", "Salvamos " + movieQuery);
+        outState.putString(QUERY_TYPE,movieQuery);
     }
 
     // This is here to ask for more pages when scrolled to bottom, ToDo later
@@ -84,7 +114,12 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
-
+    public static int calculateNoOfColumns(Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int noOfColumns = (int) (dpWidth / 180);
+        return noOfColumns;
+    }
     /**
      * This methods retrieve the data for popular and top rated Movies, using AsyncTask via the class declarated below
      */
@@ -133,6 +168,7 @@ public class MainActivity extends AppCompatActivity
 
             mAdapter.setNumberItems(NetworkUtils.MovieList.size());
             mAdapter.notifyDataSetChanged();
+            postersList.setVisibility(View.VISIBLE);
         }
     }
 
@@ -170,9 +206,6 @@ public class MainActivity extends AppCompatActivity
         // we populate here the arrays in Movies
         @Override
         protected void onPostExecute(String tmdbResults) {
-            postersList.setVisibility(View.VISIBLE);
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-
 
             if (tmdbResults != null && !tmdbResults.equals("")) {
                 try {
@@ -186,12 +219,15 @@ public class MainActivity extends AppCompatActivity
                         NetworkUtils.MovieList.add(movieToAdd);
                     }
 
+                    mAdapter.setNumberItems(NetworkUtils.MovieList.size());
                     mAdapter.notifyDataSetChanged();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
+            postersList.setVisibility(View.VISIBLE);
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -205,19 +241,26 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
         if (itemThatWasClickedId == R.id.action_popular) {
+            postersList.setVisibility(View.INVISIBLE);
             makePopularMoviesQuery(1);
+            movieQuery = "popular";
             mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
             postersList.setAdapter(mAdapter);
             return true;
         } else if (itemThatWasClickedId == R.id.action_top_rated) {
+            postersList.setVisibility(View.INVISIBLE);
             makeTopRatedMoviesQuery(1);
+            movieQuery = "toprated";
             mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
             postersList.setAdapter(mAdapter);
             return true;
         } else if (itemThatWasClickedId == R.id.action_favorites) {
+            postersList.setVisibility(View.INVISIBLE);
             mAdapter = new MovieAdapter(Movies.NUMBER_OF_POSTERS,this);
             postersList.setAdapter(mAdapter);
+            movieQuery = "favorites";
             getFavoriteMovies();
+
             return true;
         }
         return super.onOptionsItemSelected(item);

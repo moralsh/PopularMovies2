@@ -74,7 +74,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
      */
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
-        Log.d(TAG, "#" + position);
+        // Log.d(TAG, "#" + position);
         holder.bind(position);
     }
 
@@ -126,8 +126,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         void bind(int listIndex) {
             Context context = MoviePosterView.getContext();
             if (NetworkUtils.MovieList.size() > 0) {
-                if (NetworkUtils.MovieList.get(listIndex).getMovieTitle() != null) {
-                    Picasso.with(context).load(NetworkUtils.MovieList.get(listIndex).getMoviePosterURL()).into(MoviePosterView);
+                if (NetworkUtils.MovieList.size() > listIndex) {
+                    if (NetworkUtils.MovieList.get(listIndex).getMovieTitle() != null) {
+                        Picasso.with(context).load(NetworkUtils.MovieList.get(listIndex).getMoviePosterURL()).into(MoviePosterView);
+                    }
                 }
             }
         }

@@ -10,6 +10,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +54,6 @@ public class MoviesVideoAdapter extends RecyclerView.Adapter<MoviesVideoAdapter.
 
     @Override
     public void onBindViewHolder(MoviesVideoAdapter.MovieVideoViewHolder holder, int position) {
-        Log.d(TAG, "#" + position);
         if (position < MovieDetail.videoList.size()) {
             holder.bind(position);
         }
@@ -66,15 +67,21 @@ public class MoviesVideoAdapter extends RecyclerView.Adapter<MoviesVideoAdapter.
     class MovieVideoViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
         TextView mVideoLink;
+        ImageView mVideoThumbnail;
 
         public MovieVideoViewHolder(View itemView) {
             super(itemView);
             mVideoLink = (TextView) itemView.findViewById(R.id.tv_video_list_view);
+            mVideoThumbnail = (ImageView) itemView.findViewById(R.id.ic_video_list_view);
             itemView.setOnClickListener(this);
         }
 
         void bind(int listIndex) {
+            Context context = mVideoThumbnail.getContext();
+
+            String img_url="http://img.youtube.com/vi/"+ MovieDetail.videoList.get(listIndex).getKey() + "/0.jpg";
             mVideoLink.setText(MovieDetail.videoList.get(listIndex).getName());
+            Picasso.with(context).load(img_url).into(mVideoThumbnail);
         }
 
         @Override
